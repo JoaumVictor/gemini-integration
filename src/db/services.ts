@@ -101,3 +101,57 @@ export async function existsForMonthAndYear(
 
   return count > 0;
 }
+
+export async function getMeasurementsByCustomerCode(
+  customer_code: string,
+  measure_type: string | undefined
+) {
+  try {
+    const whereClause: any = { customer_code };
+
+    if (measure_type !== undefined) {
+      whereClause.measure_type = measure_type;
+    }
+
+    const measurements = await Measurement.findAll({
+      where: whereClause,
+      attributes: [
+        "id",
+        "measure_datetime",
+        "measure_type",
+        "has_confirmed",
+        "image_url",
+      ],
+    });
+
+    if (measurements.length === 0) {
+      throw new HttpException(
+        status.notFound,
+        "MEASURES_NOT_FOUND",
+        "Nenhuma leitura encontrada"
+      );
+    }
+
+    const response = {
+      customer_code,
+      measures: measurements.map((measurement) => ({
+        measure_uuid: measurement.dataValues.id,
+        measure_datetime: measurement.dataValues.measure_datetime,
+        measure_type: measurement.dataValues.measure_type,
+        has_confirmed: measurement.dataValues.has_confirmed,
+        image_url: measurement.dataValues.image_url,
+      })),
+    };
+    return response;
+  } catch (error) {
+    if (error instanceof HttpException) {
+      throw error;
+    } else {
+      throw new HttpException(
+        status.internalServerError,
+        "ERROR",
+        "Algo deu errado!"
+      );
+    }
+  }
+}

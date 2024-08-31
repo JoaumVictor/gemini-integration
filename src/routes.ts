@@ -6,6 +6,7 @@ import {
 import { createRegistrationMonthlyMiddleware } from "./middlewares/createRegistrationMonthlyMiddleware";
 import { confirmMeasurementController } from "./controllers/confirmMeasurementController";
 import { confirmMeasurementMiddleware } from "./middlewares/confirmMeasurementMiddleware";
+import { getMeasurementsController } from "./controllers/getMeasurementsController";
 
 const router = Router();
 
@@ -22,5 +23,7 @@ router.patch(
   confirmMeasurementMiddleware,
   confirmMeasurementController
 );
+
+router.get("/:customer_code/list", getMeasurementsController);
 
 export default router;

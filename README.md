@@ -34,6 +34,13 @@
 - "measure_datetime": DATETIMESTRING,
 - "measure_type": "WATER" | "GAS"
 
+### ROTA /confirm 🚩
+
+#### body :
+
+- "measure_uuid": STRING
+- "confirmed_value": NUMBER,
+
 ### 📢 Dúvidas sobre o projeto? Está faltando alguma chave de autenticação?
 
 - Só me chamar no whatsapp, email ou linkedin, vou responder rapidamente!
