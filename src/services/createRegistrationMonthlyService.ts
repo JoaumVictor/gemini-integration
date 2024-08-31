@@ -4,20 +4,31 @@ import {
 } from "@google/generative-ai/server";
 import { ImageResult } from "../utils/transformBase64";
 import { genAI } from "..";
+import { formatRegistrationMonthlyServiceResponse } from "../utils/formatResponse";
 import {
-  formatRegistrationMonthlyServiceResponse,
-  formatRegistrationMonthlyServiceResponseProps,
-} from "../utils/formatResponse";
-
-export interface IRegistrationMonthlyService {
-  uploadImageResult: UploadFileResponse | null;
-  LLMResult: formatRegistrationMonthlyServiceResponseProps;
-}
+  existsForMonthAndYear,
+  getAllMeasurements,
+  saveMeasurement,
+} from "../db/services";
+import { HttpException } from "../errors/httpException";
+import { status } from "../utils/status";
 
 export const createRegistrationMonthlyService = async (
-  imageData: ImageResult
-): Promise<IRegistrationMonthlyService> => {
+  imageData: ImageResult,
+  customer_code: string,
+  measure_datetime: string,
+  measure_type: "WATER" | "GAS"
+): Promise<any> => {
   try {
+    const measureExist = await existsForMonthAndYear(measure_datetime);
+    if (measureExist) {
+      throw new HttpException(
+        status.conflict,
+        "DOUBLE_REPORT",
+        "Leitura do mês já realizada"
+      );
+    }
+
     const fileManager = new GoogleAIFileManager(
       process.env.GEMINI_API_KEY ?? ""
     );
@@ -29,6 +40,8 @@ export const createRegistrationMonthlyService = async (
         displayName: imageData.imageName,
       }
     );
+    // console.log("RESULTADO DO UPLOAD");
+    // console.log(uploadResponse);
 
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
@@ -62,19 +75,70 @@ export const createRegistrationMonthlyService = async (
       { text: prompt },
     ]);
 
+    const LLMResult = formatRegistrationMonthlyServiceResponse(result);
+    // console.log("RESULTADO DO LLMResult");
+    // console.log(LLMResult);
+
+    // dados mockados pra testar esse banco de dados
+    // const { LLMResult, uploadResponse } = {
+    //   LLMResult: {
+    //     value: 0.00015,
+    //     isValid: true,
+    //     text: "A imagem é de um contador de água e o valor exibido é 0.00015.",
+    //   },
+    //   uploadResponse: {
+    //     file: {
+    //       name: "files/88hi131kyd1b",
+    //       displayName: "image_1724909673544.jpg",
+    //       mimeType: "image/jpeg",
+    //       sizeBytes: "191894",
+    //       createTime: "2024-08-29T05:34:33.558111Z",
+    //       updateTime: "2024-08-29T05:34:33.558111Z",
+    //       expirationTime: "2024-08-31T05:34:33.496379878Z",
+    //       sha256Hash:
+    //         "N2E0NTVkOThjNGE3ZDc5YmNjZmI4MDljY2M5Y2JmMWE1OWU4MjdlYjE0MTFiMzU4MDlkMTVhM2Y0ZWMyM2Y3NA==",
+    //       uri: "https://generativelanguage.googleapis.com/v1beta/files/88hi131kyd1b",
+    //       state: "ACTIVE",
+    //     },
+    //   },
+    // };
+
+    if (!LLMResult) {
+      throw new HttpException(
+        status.badRequest,
+        "INVALID_DATA",
+        "Data inválido"
+      );
+    }
+
+    if (!LLMResult.isValid) {
+      throw new HttpException(
+        status.badRequest,
+        "INVALID_DATA",
+        LLMResult.text
+      );
+    }
+
+    const response = await saveMeasurement({
+      image_url: uploadResponse.file.uri,
+      measure_value: LLMResult.value,
+      customer_code,
+      measure_datetime: measure_datetime,
+      measure_type,
+    });
+
     return {
-      uploadImageResult: uploadResponse,
-      LLMResult: formatRegistrationMonthlyServiceResponse(result),
+      // image_url: `http://localhost:80/images${imageData.imagePath}`,
+      image_url: uploadResponse.file.uri,
+      measure_value: LLMResult.value,
+      measure_uuid: response.dataValues.id,
     };
   } catch (error) {
-    console.log(error);
-    return {
-      uploadImageResult: null,
-      LLMResult: {
-        value: 0,
-        isValid: false,
-        text: "Algo deu errado no upload da imagem",
-      },
-    };
+    throw error;
   }
 };
+
+export async function getAllRegistrationMonthlyService() {
+  const response = await getAllMeasurements();
+  return response;
+}

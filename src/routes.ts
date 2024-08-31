@@ -1,14 +1,19 @@
 // src/routes.ts
 import { Router } from "express";
-import { createRegistrationMonthlyController } from "./controllers/createRegistrationMonthlyController";
+import {
+  createRegistrationMonthlyController,
+  getAllMonthlyController,
+} from "./controllers/createRegistrationMonthlyController";
 import { createRegistrationMonthlyMiddleware } from "./middlewares/createRegistrationMonthlyMiddleware";
 
 const router = Router();
 
 router.post(
-  "/post",
+  "/upload",
   createRegistrationMonthlyMiddleware,
   createRegistrationMonthlyController
 );
+
+router.get("/get", getAllMonthlyController);
 
 export default router;
