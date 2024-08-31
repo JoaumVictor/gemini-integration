@@ -1,5 +1,7 @@
 import { Op } from "sequelize";
 import Measurement from "./models";
+import { HttpException } from "../errors/httpException";
+import { status } from "../utils/status";
 
 interface MeasurementData {
   image_url: string;
@@ -13,7 +15,10 @@ export const saveMeasurement = async (
   data: MeasurementData
 ): Promise<Measurement> => {
   try {
-    const measurement = await Measurement.create(data);
+    const measurement = await Measurement.create({
+      has_confirmed: false,
+      ...data,
+    });
     console.log("Dados salvos com sucesso.");
     return measurement;
   } catch (error) {
@@ -30,6 +35,49 @@ export const getAllMeasurements = async () => {
   } catch (error) {
     console.error("Erro ao buscar os registros:", error);
     throw new Error("Erro ao buscar os registros");
+  }
+};
+
+export const updateMeasureValue = async (id: string, newValue: number) => {
+  try {
+    const measurement = await Measurement.findByPk(id);
+
+    if (!measurement) {
+      throw new HttpException(
+        status.notFound,
+        "MEASURE_NOT_FOUND",
+        "Leitura do mês já realizada"
+      );
+    }
+
+    if (measurement.dataValues.has_confirmed) {
+      throw new HttpException(
+        status.conflict,
+        "CONFIRMATION_DUPLICATE",
+        "Leitura do mês já realizada"
+      );
+    }
+
+    const measurementUpdated = await Measurement.update(
+      { measure_value: newValue, has_confirmed: true },
+      {
+        where: { id },
+        returning: true,
+      }
+    );
+
+    return measurementUpdated;
+  } catch (error) {
+    console.error("Erro ao atualizar measurement:", error);
+    if (error instanceof HttpException) {
+      throw error;
+    } else {
+      throw new HttpException(
+        status.notFound,
+        "MEASURE_NOT_FOUND",
+        "Leitura do mês já realizada"
+      );
+    }
   }
 };
 

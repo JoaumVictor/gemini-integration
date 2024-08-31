@@ -8,6 +8,7 @@ interface MeasurementAttributes {
   customer_code: string;
   measure_datetime: string;
   measure_type: "WATER" | "GAS";
+  has_confirmed: boolean;
 }
 
 interface MeasurementCreationAttributes
@@ -23,6 +24,7 @@ class Measurement
   public customer_code!: string;
   public measure_datetime!: string;
   public measure_type!: "WATER" | "GAS";
+  public has_confirmed!: boolean;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -54,6 +56,11 @@ Measurement.init(
     measure_type: {
       type: DataTypes.ENUM("WATER", "GAS"),
       allowNull: false,
+    },
+    has_confirmed: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     },
   },
   {

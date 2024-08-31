@@ -62,7 +62,7 @@ export const createRegistrationMonthlyService = async (
       }
 
       Se a imagem não for um contador, retorne o valor 0 para "value" e "false" para "isValid".
-      Se a leitura não for clara, informe o motivo na "text".
+      Se a leitura não for clara, informe o motivo na "text" e retorne o valor false para "isValid".
     `;
 
     const result = await model.generateContent([
