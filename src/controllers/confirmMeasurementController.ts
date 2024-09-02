@@ -12,6 +12,5 @@ export const confirmMeasurementController = async (
     confirmed_value,
     measure_uuid,
   });
-  console.log(response);
   return res.status(status.ok).json({ success: true });
 };

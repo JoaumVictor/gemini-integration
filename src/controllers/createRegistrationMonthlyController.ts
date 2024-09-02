@@ -20,7 +20,6 @@ export const createRegistrationMonthlyController = async (
   }: IRegistrationMonthly = req.body;
   const outputDir = path.join(__dirname, "../output");
   const imageData = convertBase64ToImage(image, outputDir);
-  console.log(imageData);
   const response = await createRegistrationMonthlyService(
     imageData,
     customer_code,

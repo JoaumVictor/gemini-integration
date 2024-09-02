@@ -40,8 +40,6 @@ export const createRegistrationMonthlyService = async (
         displayName: imageData.imageName,
       }
     );
-    // console.log("RESULTADO DO UPLOAD");
-    // console.log(uploadResponse);
 
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
@@ -61,8 +59,8 @@ export const createRegistrationMonthlyService = async (
         "text": "<mensagem_descritiva>"
       }
 
-      Se a imagem não for um contador, retorne o valor 0 para "value" e "false" para "isValid".
-      Se a leitura não for clara, informe o motivo na "text" e retorne o valor false para "isValid".
+      Se a imagem não for um contador, retorne o valor "0" para "value" e "false" para "isValid".
+      Se a leitura não for clara, informe o motivo na "text" e retorne o valor "false" para "isValid".
     `;
 
     const result = await model.generateContent([
@@ -76,8 +74,6 @@ export const createRegistrationMonthlyService = async (
     ]);
 
     const LLMResult = formatRegistrationMonthlyServiceResponse(result);
-    // console.log("RESULTADO DO LLMResult");
-    // console.log(LLMResult);
 
     // dados mockados pra testar esse banco de dados
     // const { LLMResult, uploadResponse } = {
@@ -123,13 +119,12 @@ export const createRegistrationMonthlyService = async (
       image_url: uploadResponse.file.uri,
       measure_value: LLMResult.value,
       customer_code,
-      measure_datetime: measure_datetime,
+      measure_datetime,
       measure_type,
     });
 
     return {
-      // image_url: `http://localhost:80/images${imageData.imagePath}`,
-      image_url: uploadResponse.file.uri,
+      image_url: `http://localhost:80/images/${imageData.imageName}`,
       measure_value: LLMResult.value,
       measure_uuid: response.dataValues.id,
     };

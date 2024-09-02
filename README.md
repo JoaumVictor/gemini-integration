@@ -41,9 +41,17 @@
 - "measure_uuid": STRING
 - "confirmed_value": NUMBER,
 
+### ROTA /"customer-code"/list?measure_type="WATER"|"GAS"
+
+### ROTA /image/"image-url" 🚩
+
 ### 📢 Dúvidas sobre o projeto? Está faltando alguma chave de autenticação?
 
 - Só me chamar no whatsapp, email ou linkedin, vou responder rapidamente!
 - (82)998073039
 - joaumvictor.oficial@gmail.com
 - https://www.linkedin.com/in/victorfausto/
+
+### Notas:
+
+- A aplicação chegou pra mim no inicio da semana, pensei em fazer no sábado e domingo, mas só me deram até sexta a noite pra terminar e entregar, corri no tempo livre da semana pra fazer oq dava mas faltaram ajustes como o filtro measure_type da ultima rota e a rota estática das imagens que eram detalhes, enfim, subi a correção sábado e domingo pra não perder o teste por essas besteiras, a semana foi corrida e não deu tempo de dar esse retoque até sexta! Valeu!
